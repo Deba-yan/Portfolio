@@ -1,58 +1,44 @@
-const typedText = document.getElementById("typedText");
-const phrases = ["code.", "algorithms.", "web apps.", "ideas into reality."];
-let phrase = 0, char = 0, deleting = false;
+const menuToggle = document.getElementById('menuToggle');
+const navbar = document.querySelector('.navbar');
+const navLinks = document.querySelectorAll('#siteNav a');
 
-function typeLoop() {
-  const current = phrases[phrase];
-  typedText.textContent = current.slice(0, char);
-  if (!deleting && char < current.length) {
-    char++;
-    setTimeout(typeLoop, 90);
-  } else if (!deleting) {
-    deleting = true;
-    setTimeout(typeLoop, 1200);
-  } else if (char > 0) {
-    char--;
-    setTimeout(typeLoop, 45);
-  } else {
-    deleting = false;
-    phrase = (phrase + 1) % phrases.length;
-    setTimeout(typeLoop, 250);
-  }
+menuToggle?.addEventListener('click', () => {
+  const open = navbar.classList.toggle('nav-open');
+  menuToggle.setAttribute('aria-expanded', String(open));
+  menuToggle.textContent = open ? '✕' : '☰';
+});
+
+navLinks.forEach(link => link.addEventListener('click', () => {
+  navbar.classList.remove('nav-open');
+  menuToggle?.setAttribute('aria-expanded', 'false');
+  if (menuToggle) menuToggle.textContent = '☰';
+}));
+
+const showMoreBtn = document.getElementById('showMoreBtn');
+const projectsGrid = document.querySelector('.projects-grid');
+showMoreBtn?.addEventListener('click', () => {
+  const expanded = projectsGrid.classList.toggle('show-all');
+  showMoreBtn.setAttribute('aria-expanded', String(expanded));
+  showMoreBtn.textContent = expanded ? 'Show less ↑' : 'Show more projects ↓';
+  if (!expanded) document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' });
+});
+
+const themeToggle = document.getElementById('themeToggle');
+themeToggle?.addEventListener('click', () => {
+  document.body.classList.toggle('light-theme');
+  themeToggle.textContent = document.body.classList.contains('light-theme') ? '☾' : '☀';
+});
+
+const typedText = document.getElementById('typedText');
+const words = ['C++', 'Python', 'JavaScript', 'DSA', 'Web Development'];
+let wi = 0, ci = 0, deleting = false;
+function typeLoop(){
+  if(!typedText) return;
+  const word = words[wi];
+  typedText.textContent = deleting ? word.slice(0, ci--) : word.slice(0, ci++);
+  if(!deleting && ci > word.length){ deleting=true; setTimeout(typeLoop, 1000); return; }
+  if(deleting && ci < 0){ deleting=false; wi=(wi+1)%words.length; ci=0; }
+  setTimeout(typeLoop, deleting ? 55 : 90);
 }
 typeLoop();
 
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add("visible");
-      observer.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.12 });
-
-document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
-
-const toggle = document.getElementById("themeToggle");
-const savedTheme = localStorage.getItem("portfolio-theme");
-if (savedTheme === "light") document.body.classList.add("light");
-
-function updateThemeIcon() {
-  toggle.textContent = document.body.classList.contains("light") ? "☾" : "☀";
-}
-updateThemeIcon();
-
-toggle.addEventListener("click", () => {
-  document.body.classList.toggle("light");
-  localStorage.setItem(
-    "portfolio-theme",
-    document.body.classList.contains("light") ? "light" : "dark"
-  );
-  updateThemeIcon();
-});
-
-const glow = document.querySelector(".cursor-glow");
-window.addEventListener("pointermove", e => {
-  glow.style.left = `${e.clientX}px`;
-  glow.style.top = `${e.clientY}px`;
-});
